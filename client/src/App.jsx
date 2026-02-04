@@ -477,7 +477,8 @@ function App() {
                                                                 placeholder="Weight (g)"
                                                                 value={manualWeight}
                                                                 onChange={(e) => setManualWeight(e.target.value)}
-                                                                className="w-1/3 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                                                                disabled={!manualCalories}
+                                                                className={`w-1/3 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors ${!manualCalories ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                             />
                                                             <button
                                                                 onClick={handleManualSubmit}
@@ -487,7 +488,7 @@ function App() {
                                                             </button>
                                                         </div>
                                                         <p className="text-xs text-gray-500 text-center">
-                                                            Leave Kcal empty to auto-calculate with AI.
+                                                            Leave Kcal  empty to auto-calculate with AI.
                                                         </p>
                                                     </div>
                                                 </div>
