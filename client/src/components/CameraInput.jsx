@@ -21,7 +21,7 @@ export function CameraInput({ onImageSelected }) {
             <input
                 type="file"
                 accept="image/*"
-                capture="environment" // Opens camera on mobile
+                // capture="environment" // Removed to allow gallery access
                 className="hidden"
                 ref={fileInputRef}
                 onChange={handleFileChange}
