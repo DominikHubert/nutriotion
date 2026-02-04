@@ -43,6 +43,8 @@ function App() {
     const [manualFoodName, setManualFoodName] = useState('');
     const [manualCalories, setManualCalories] = useState('');
     const [manualWeight, setManualWeight] = useState('');
+    const [manualSportName, setManualSportName] = useState('');
+    const [manualSportCalories, setManualSportCalories] = useState('');
 
     // Auth State
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -235,6 +237,28 @@ function App() {
             alert("Failed to process entry");
         } finally {
             setAnalyzing(false);
+        }
+    }
+
+    const handleManualSportSubmit = async () => {
+        if (!manualSportName || !manualSportCalories) {
+            alert("Please enter activity name and calories");
+            return;
+        }
+
+        try {
+            await addEntry({
+                type: 'sport',
+                name: manualSportName,
+                calories: parseFloat(manualSportCalories),
+                date: new Date().toISOString()
+            });
+            setManualSportName('');
+            setManualSportCalories('');
+            await refreshStats();
+            setActiveTab('dashboard');
+        } catch (e) {
+            alert("Failed to save activity");
         }
     }
 
@@ -494,7 +518,38 @@ function App() {
                                                 </div>
                                             </>
                                         ) : (
-                                            <SportInput onAnalyze={handleSportText} />
+                                            <>
+                                                <SportInput onAnalyze={handleSportText} />
+                                                <div className="mt-6 border-t border-slate-700 pt-6">
+                                                    <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">Manual Activity</h3>
+                                                    <div className="space-y-3">
+                                                        <div>
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Activity Name (e.g. Running)"
+                                                                value={manualSportName}
+                                                                onChange={(e) => setManualSportName(e.target.value)}
+                                                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors"
+                                                            />
+                                                        </div>
+                                                        <div className="flex space-x-3">
+                                                            <input
+                                                                type="number"
+                                                                placeholder="Kcal Burned"
+                                                                value={manualSportCalories}
+                                                                onChange={(e) => setManualSportCalories(e.target.value)}
+                                                                className="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors"
+                                                            />
+                                                            <button
+                                                                onClick={handleManualSportSubmit}
+                                                                className="w-1/2 bg-orange-600 hover:bg-orange-500 text-white font-semibold rounded-lg px-4 py-3 transition-colors"
+                                                            >
+                                                                Add Activity
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </>
                                         )}
 
                                         {/* Favorites Section */}
