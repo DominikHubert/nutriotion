@@ -37,3 +37,6 @@ database.sqlite
 
 # Docker
 docker-compose.override.yml
+
+nutrition
+nutrition.pub
