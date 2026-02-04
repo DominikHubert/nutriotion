@@ -3,8 +3,9 @@ FROM node:20-alpine AS frontend-builder
 WORKDIR /app/client
 COPY client/package*.json ./
 RUN npm ci
+RUN npm install
 COPY client/ ./
-RUN npm run build
+#RUN npm run build
 
 # Stage 2: Setup Server & Final Image
 FROM node:20-alpine
@@ -13,7 +14,8 @@ WORKDIR /app
 # Install Server Dependencies
 COPY server/package*.json ./server/
 WORKDIR /app/server
-RUN npm ci --only=production
+RUN npm install --omit=dev
+#RUN npm ci --only=production
 
 # Copy Server Code
 COPY server/ ./
