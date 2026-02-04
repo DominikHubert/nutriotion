@@ -5,7 +5,7 @@ const { getDb } = require('../db');
 // POST /api/entries - Add a new entry
 router.post('/', async (req, res) => {
     try {
-        const { type, name, calories, protein, carbs, fat, date } = req.body;
+        const { type, name, calories, protein, carbs, fat, date, weight } = req.body;
         const userId = req.user.id;
 
         // Simplistic validation
@@ -15,9 +15,9 @@ router.post('/', async (req, res) => {
 
         const db = await getDb();
         const result = await db.run(
-            `INSERT INTO entries (user_id, type, name, calories, protein, carbs, fat, date) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [userId, type, name, calories, protein, carbs, fat, date || new Date().toISOString()]
+            `INSERT INTO entries (user_id, type, name, calories, protein, carbs, fat, date, weight) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [userId, type, name, calories, protein, carbs, fat, date || new Date().toISOString(), weight]
         );
 
         res.json({ id: result.lastID, success: true });

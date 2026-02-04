@@ -55,6 +55,18 @@ async function initDb() {
     );
   `);
   console.log('Database initialized');
+
+  // Migration: Add weight column if not exists
+  try {
+    await database.exec(`ALTER TABLE entries ADD COLUMN weight REAL`);
+    console.log("Added weight column to entries");
+  } catch (e) { }
+
+  try {
+    await database.exec(`ALTER TABLE favorites ADD COLUMN weight REAL`);
+    console.log("Added weight column to favorites");
+  } catch (e) { }
+
   return database;
 }
 

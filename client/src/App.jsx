@@ -8,6 +8,7 @@ import { EditEntry } from './components/EditEntry';
 import { HistoryChart } from './components/HistoryChart';
 import { Auth } from './components/Auth';
 import { getProfile, analyzeFood, analyzeFoodText, analyzeSport, addEntry, getDailyStats, deleteEntry, updateEntry, logout, getFavorites, addFavorite, deleteFavorite } from './services/api';
+import { FavoriteReviewModal } from './components/FavoriteReviewModal';
 
 // Simplified Icon components
 const IconEdit = () => (
@@ -36,10 +37,12 @@ function App() {
 
     // Edit State
     const [editingEntry, setEditingEntry] = useState(null);
+    const [selectedFavorite, setSelectedFavorite] = useState(null);
 
     // Manual Entry State
     const [manualFoodName, setManualFoodName] = useState('');
     const [manualCalories, setManualCalories] = useState('');
+    const [manualWeight, setManualWeight] = useState('');
 
     // Auth State
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -127,7 +130,8 @@ function App() {
                     calories: food.calories,
                     protein: food.protein_g,
                     carbs: food.carbs_g,
-                    fat: food.fat_g
+                    fat: food.fat_g,
+                    weight: food.weight_g
                 });
             }
             await refreshStats();
@@ -155,18 +159,33 @@ function App() {
     }
 
     const handleAddFavoriteEntry = async (fav) => {
+        // Open the review modal instead of adding directly
+        if (fav.type === 'food') {
+            setSelectedFavorite(fav);
+        } else {
+            // For sport, maybe just add directly for now or also review? 
+            // Logic in modal supports all, but let's stick to food for weight calc mostly.
+            // Actually, easier to just open modal for everything.
+            setSelectedFavorite(fav);
+        }
+    }
+
+    const handleSaveFavoriteEntry = async (entryData) => {
         try {
             await addEntry({
-                type: fav.type,
-                name: fav.name,
-                calories: fav.calories,
-                protein: fav.protein,
-                carbs: fav.carbs,
-                fat: fav.fat,
+                type: entryData.type,
+                name: entryData.name,
+                calories: entryData.calories,
+                protein: entryData.protein,
+                carbs: entryData.carbs,
+                fat: entryData.fat,
+                weight: entryData.weight,
                 date: new Date().toISOString()
             });
             await refreshStats();
-            alert(`Added ${fav.name}`);
+            setSelectedFavorite(null);
+            setActiveTab('dashboard');
+            alert(`Added ${entryData.name}`);
         } catch (e) {
             alert('Failed to add favorite');
         }
@@ -181,17 +200,28 @@ function App() {
         setAnalyzing(true);
         try {
             if (manualCalories) {
+                let finalCalories = parseFloat(manualCalories);
+                let finalWeight = null;
+
+                if (manualWeight && parseFloat(manualWeight) > 0) {
+                    // Weight provided: Treat manualCalories as Kcal/100g
+                    finalWeight = parseFloat(manualWeight);
+                    finalCalories = (parseFloat(manualCalories) / 100) * finalWeight;
+                }
+
                 // Direct Save
                 await addEntry({
                     type: 'food',
                     name: manualFoodName,
-                    calories: parseFloat(manualCalories),
+                    calories: finalCalories,
                     protein: 0, // Unknown
                     carbs: 0,
-                    fat: 0
+                    fat: 0,
+                    weight: finalWeight
                 });
                 setManualFoodName('');
                 setManualCalories('');
+                setManualWeight('');
                 await refreshStats();
                 setAnalysisResult(null);
                 setActiveTab('dashboard');
@@ -223,7 +253,8 @@ function App() {
                     calories: entry.calories,
                     protein: entry.protein,
                     carbs: entry.carbs,
-                    fat: entry.fat
+                    fat: entry.fat,
+                    weight: entry.weight || 100 // Default to 100g if unknown when saving as favorite
                 });
                 alert("Saved to favorites!");
             }
@@ -436,14 +467,21 @@ function App() {
                                                         <div className="flex space-x-3">
                                                             <input
                                                                 type="number"
-                                                                placeholder="Kcal (Optional)"
+                                                                placeholder="Kcal"
                                                                 value={manualCalories}
                                                                 onChange={(e) => setManualCalories(e.target.value)}
-                                                                className="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                                                                className="w-1/3 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                                                            />
+                                                            <input
+                                                                type="number"
+                                                                placeholder="Weight (g)"
+                                                                value={manualWeight}
+                                                                onChange={(e) => setManualWeight(e.target.value)}
+                                                                className="w-1/3 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
                                                             />
                                                             <button
                                                                 onClick={handleManualSubmit}
-                                                                className="w-1/2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg px-4 py-3 transition-colors"
+                                                                className="w-1/3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg px-4 py-3 transition-colors"
                                                             >
                                                                 Add Entry
                                                             </button>
@@ -517,6 +555,14 @@ function App() {
                     entry={editingEntry}
                     onSave={handleSaveEdit}
                     onCancel={() => setEditingEntry(null)}
+                />
+            )}
+
+            {selectedFavorite && (
+                <FavoriteReviewModal
+                    favorite={selectedFavorite}
+                    onSave={handleSaveFavoriteEntry}
+                    onCancel={() => setSelectedFavorite(null)}
                 />
             )}
 
