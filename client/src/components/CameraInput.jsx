@@ -17,20 +17,15 @@ export function CameraInput({ onImageSelected }) {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-600 rounded-2xl bg-slate-800 hover:bg-slate-750 transition-colors">
+        <label className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-600 rounded-2xl bg-slate-800 hover:bg-slate-750 transition-colors cursor-pointer block w-full">
             <input
                 type="file"
                 accept="image/*"
-                // capture="environment" // Removed to allow gallery access
                 className="hidden"
-                ref={fileInputRef}
                 onChange={handleFileChange}
             />
 
-            <div
-                onClick={() => fileInputRef.current?.click()}
-                className="cursor-pointer flex flex-col items-center space-y-4"
-            >
+            <div className="flex flex-col items-center space-y-4">
                 <div className="p-4 bg-blue-600/20 rounded-full text-blue-400">
                     <Camera size={48} />
                 </div>
@@ -39,6 +34,6 @@ export function CameraInput({ onImageSelected }) {
                     <p className="text-sm text-gray-400">or upload from gallery</p>
                 </div>
             </div>
-        </div>
+        </label>
     );
 }
