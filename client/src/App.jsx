@@ -209,22 +209,28 @@ function App() {
     }
 
     const handleToggleFavorite = async (entry) => {
-        // Check if already in favorites (by name/type mostly or simplistic check)
-        // Actually best to just allow adding multiple or check unique.
-        // Let's just add new favorite from entry data.
+        // Find if already in favorites (match by name/type approx)
+        const exitingFav = favorites.find(f => f.name === entry.name && f.type === entry.type);
+
         try {
-            await addFavorite({
-                type: entry.type,
-                name: entry.name,
-                calories: entry.calories,
-                protein: entry.protein,
-                carbs: entry.carbs,
-                fat: entry.fat
-            });
+            if (exitingFav) {
+                await deleteFavorite(exitingFav.id);
+                alert("Removed from favorites");
+            } else {
+                await addFavorite({
+                    type: entry.type,
+                    name: entry.name,
+                    calories: entry.calories,
+                    protein: entry.protein,
+                    carbs: entry.carbs,
+                    fat: entry.fat
+                });
+                alert("Saved to favorites!");
+            }
             await refreshFavorites();
-            alert("Saved to favorites!");
         } catch (e) {
-            alert("Failed to save favorite");
+            console.error(e);
+            alert("Action failed");
         }
     }
 
@@ -367,8 +373,8 @@ function App() {
                                                 {entry.type === 'food' ? '+' : '-'}{Math.round(entry.calories)}
                                             </div>
                                             <div className="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => handleToggleFavorite(entry)} className="p-2 hover:bg-slate-700 rounded-lg" title="Save to Favorites">
-                                                    <IconStar filled={false} />
+                                                <button onClick={() => handleToggleFavorite(entry)} className="p-2 hover:bg-slate-700 rounded-lg" title="Toggle Favorite">
+                                                    <IconStar filled={favorites.some(f => f.name === entry.name && f.type === entry.type)} />
                                                 </button>
                                                 <button onClick={() => handleEditEntry(entry)} className="p-2 text-gray-400 hover:text-white bg-slate-700 rounded-lg">
                                                     <IconEdit />

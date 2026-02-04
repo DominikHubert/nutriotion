@@ -14,7 +14,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-// POST /api/favorites
 router.post('/', async (req, res) => {
     try {
         const userId = req.user.id;
@@ -25,6 +24,17 @@ router.post('/', async (req, res) => {
         }
 
         const db = await getDb();
+
+        // Check availability
+        const existing = await db.get(
+            'SELECT id FROM favorites WHERE user_id = ? AND type = ? AND name = ?',
+            [userId, type, name]
+        );
+
+        if (existing) {
+            return res.status(400).json({ error: 'Favorite already exists', id: existing.id });
+        }
+
         const result = await db.run(
             `INSERT INTO favorites (user_id, type, name, calories, protein, carbs, fat) 
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
