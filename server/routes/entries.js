@@ -146,7 +146,28 @@ router.get('/history', async (req, res) => {
             return res.json(result);
         }
 
-        const days = range === 'month' ? 30 : 7;
+        if (range === 'month') {
+            const entries = await db.all(
+                `SELECT 
+                    strftime('%Y-%W', date) as year_week,
+                    SUM(CASE WHEN type='food' THEN calories ELSE 0 END) as calories_in,
+                    SUM(CASE WHEN type='sport' THEN calories ELSE 0 END) as calories_out
+                 FROM entries 
+                 WHERE user_id = ? AND date >= date('now', '-60 days')
+                 GROUP BY year_week
+                 ORDER BY year_week ASC`,
+                [userId]
+            );
+
+            const result = entries.map(e => ({
+                date: e.year_week,
+                calories_in: e.calories_in,
+                calories_out: e.calories_out
+            }));
+            return res.json(result);
+        }
+
+        const days = 7;
 
         const entries = await db.all(
             `SELECT * FROM entries WHERE user_id = ? AND date >= date('now', '-${days} days')`,

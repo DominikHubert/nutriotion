@@ -16,7 +16,11 @@ export function HistoryChart() {
                     // h.date is YYYY-MM
                     const [y, m] = h.date.split('-');
                     const dateObj = new Date(parseInt(y), parseInt(m) - 1);
-                    displayDate = dateObj.toLocaleDateString([], { month: 'short' }); // "Jan", "Feb"
+                    displayDate = dateObj.toLocaleDateString([], { month: 'short' }); // "Jan"
+                } else if (range === 'month') {
+                    // h.date is YYYY-WW (e.g. 2024-05)
+                    const [y, w] = h.date.split('-');
+                    displayDate = `KW ${w}`;
                 } else {
                     // h.date is YYYY-MM-DD
                     displayDate = new Date(h.date).toLocaleDateString([], { day: '2-digit', month: '2-digit' });
