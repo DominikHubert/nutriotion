@@ -10,6 +10,7 @@ import { Auth } from './components/Auth';
 import { getProfile, analyzeFood, analyzeFoodText, analyzeSport, addEntry, getDailyStats, deleteEntry, updateEntry, logout, getFavorites, addFavorite, deleteFavorite } from './services/api';
 import { FavoriteReviewModal } from './components/FavoriteReviewModal';
 import { VoiceInput } from './components/VoiceInput';
+import { DashboardSummary } from './components/DashboardSummary';
 
 // Simplified Icon components
 const IconEdit = () => (
@@ -431,31 +432,12 @@ function App() {
                             </button>
                         </div>
 
-                        <div className="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
-                            <h2 className="text-xl font-semibold mb-6 text-gray-200">Daily Summary</h2>
-
-                            <div className="relative w-48 h-48 mx-auto mb-6 flex items-center justify-center rounded-full border-8 border-slate-700">
-                                <div className="text-center">
-                                    <div className={`text-3xl font-bold ${getProgressColor()}`}>{netCalories}</div>
-                                    <div className="text-xs text-gray-500 uppercase tracking-widest mt-1">kcal eaten</div>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-4 text-center">
-                                <div className="bg-slate-900/50 p-2 rounded-lg">
-                                    <div className="text-xs text-gray-500">Left</div>
-                                    <div className="font-bold text-white">{remaining}</div>
-                                </div>
-                                <div className="bg-slate-900/50 p-2 rounded-lg">
-                                    <div className="text-xs text-gray-500">Burned</div>
-                                    <div className="font-bold text-orange-400">{dailyStats.calories_out}</div>
-                                </div>
-                                <div className="bg-slate-900/50 p-2 rounded-lg">
-                                    <div className="text-xs text-gray-500">Eaten</div>
-                                    <div className="font-bold text-blue-400">{dailyStats.calories_in}</div>
-                                </div>
-                            </div>
-                        </div>
+                        {/* Dashboard Summary */}
+                        <DashboardSummary
+                            stats={dailyStats}
+                            profile={profile}
+                            onAddClick={() => setActiveTab('add')}
+                        />
 
                         <HistoryChart />
 
