@@ -26,17 +26,30 @@ router.post('/', async (req, res) => {
     }
 });
 
-// GET /api/entries/today - Get stats for today
+// GET /api/entries/today - Get stats for a specific date (defaults to today)
 router.get('/today', async (req, res) => {
     try {
         const userId = req.user.id;
+        const { date } = req.query; // Expects YYYY-MM-DD
         const db = await getDb();
 
-        // Fetch all entries for today (UTC based as default)
-        const entries = await db.all(
-            `SELECT * FROM entries WHERE user_id = ? AND date >= date('now', 'start of day')`,
-            [userId]
-        );
+        let query = `SELECT * FROM entries WHERE user_id = ? AND date(date) = ?`;
+        let params = [userId];
+
+        if (date) {
+            params.push(date);
+        } else {
+            // Default to today local time (server time)
+            // Ideally client should always send date to avoid timezone issues, but fallback:
+            query = `SELECT * FROM entries WHERE user_id = ? AND date(date) = date('now', 'localtime')`;
+            params = [userId];
+        }
+
+        // Fix: 'now' in sqlite is UTC. 'localtime' converts. 
+        // Better: Client sends YYYY-MM-DD.
+        // If client sends date, we match exact string.
+
+        const entries = await db.all(query, params);
 
         const stats = {
             calories_in: 0,

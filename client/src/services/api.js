@@ -82,9 +82,10 @@ export const addEntry = async (entryData) => {
     return response.data;
 }
 
-export const getDailyStats = async () => {
+export const getDailyStats = async (date) => {
     try {
-        const response = await api.get('/entries/today');
+        const query = date ? `?date=${date}` : '';
+        const response = await api.get(`/entries/today${query}`);
         return response.data;
     } catch (error) {
         console.error("Error fetching stats", error);
