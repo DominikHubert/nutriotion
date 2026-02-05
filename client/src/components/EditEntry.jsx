@@ -3,10 +3,17 @@ import React, { useState } from 'react';
 export function EditEntry({ entry, onSave, onCancel }) {
     const [name, setName] = useState(entry.name);
     const [calories, setCalories] = useState(entry.calories);
+    // Initialize date from entry.date (ISO string) -> YYYY-MM-DD
+    const [date, setDate] = useState(entry.date ? entry.date.split('T')[0] : new Date().toISOString().split('T')[0]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave(entry.id, { name, calories: Number(calories) });
+        // Send full ISO string for consistency, or just date part? Backend takes whatever.
+        // Let's standardise on YYYY-MM-DD that the date picker gives, or append time?
+        // App uses simple dates usually. Let's send the date string from input.
+        // Actually, db expects ISO often or YYYY-MM-DD. 
+        // Let's send it as is, backend logic usually handles it or just stores string.
+        onSave(entry.id, { name, calories: Number(calories), date: date });
     };
 
     return (
@@ -29,6 +36,15 @@ export function EditEntry({ entry, onSave, onCancel }) {
                             type="number"
                             value={calories}
                             onChange={e => setCalories(e.target.value)}
+                            className="w-full bg-slate-900 rounded p-2 text-white border border-slate-600 focus:border-blue-500 outline-none"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs text-gray-400">Date</label>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={e => setDate(e.target.value)}
                             className="w-full bg-slate-900 rounded p-2 text-white border border-slate-600 focus:border-blue-500 outline-none"
                         />
                     </div>

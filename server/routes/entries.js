@@ -92,11 +92,11 @@ router.delete('/:id', async (req, res) => {
 // PUT /api/entries/:id
 router.put('/:id', async (req, res) => {
     try {
-        const { name, calories } = req.body;
+        const { name, calories, date } = req.body;
         const db = await getDb();
         await db.run(
-            'UPDATE entries SET name = ?, calories = ? WHERE id = ? AND user_id = ?',
-            [name, calories, req.params.id, req.user.id]
+            'UPDATE entries SET name = ?, calories = ?, date = ? WHERE id = ? AND user_id = ?',
+            [name, calories, date, req.params.id, req.user.id]
         );
         res.json({ success: true });
     } catch (error) {

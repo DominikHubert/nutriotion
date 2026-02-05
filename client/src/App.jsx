@@ -329,7 +329,11 @@ function App() {
     const handleSaveEdit = async (id, data) => {
         await updateEntry(id, data);
         setEditingEntry(null);
-        refreshStats();
+        if (data.date && data.date !== currentDate) {
+            setCurrentDate(data.date);
+        } else {
+            refreshStats();
+        }
     }
 
     const handleLoginSuccess = () => {
