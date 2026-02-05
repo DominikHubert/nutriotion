@@ -107,21 +107,53 @@ router.put('/:id', async (req, res) => {
 // GET /api/entries/history - Get history stats
 router.get('/history', async (req, res) => {
     try {
-        const { range } = req.query; // 'week' or 'month'
-        const days = range === 'month' ? 30 : 7;
+        const { range } = req.query; // 'week', 'month', or 'year'
         const userId = req.user.id;
-
         const db = await getDb();
-        // SQLite date modifiers: 'now', '-7 days'
-        // We use local time approximation by just taking the date part of ISO string stored in DB usually
-        // Note: DB stores dates as ISO strings (UTC usually).
+
+        if (range === 'year') {
+            // Aggregation by month for the last 12 months
+            // We use a recursive CTE or just generate the months in JS?
+            // SQLite simple approach: Group by strftime('%Y-%m')
+
+            const entries = await db.all(
+                `SELECT 
+                    strftime('%Y-%m', date) as month,
+                    SUM(CASE WHEN type='food' THEN calories ELSE 0 END) as calories_in,
+                    SUM(CASE WHEN type='sport' THEN calories ELSE 0 END) as calories_out
+                 FROM entries 
+                 WHERE user_id = ? AND date >= date('now', 'start of month', '-11 months')
+                 GROUP BY month
+                 ORDER BY month ASC`,
+                [userId]
+            );
+
+            // Fill in missing months?
+            // Let's generate the last 12 months in JS to ensure we have all bars
+            const result = [];
+            for (let i = 11; i >= 0; i--) {
+                const d = new Date();
+                d.setMonth(d.getMonth() - i);
+                const monthStr = d.toISOString().slice(0, 7); // YYYY-MM
+
+                const found = entries.find(e => e.month === monthStr);
+                result.push({
+                    date: monthStr, // Use YYYY-MM as key
+                    calories_in: found ? found.calories_in : 0,
+                    calories_out: found ? found.calories_out : 0
+                });
+            }
+            return res.json(result);
+        }
+
+        const days = range === 'month' ? 30 : 7;
 
         const entries = await db.all(
             `SELECT * FROM entries WHERE user_id = ? AND date >= date('now', '-${days} days')`,
             [userId]
         );
 
-        // Process data
+        // Process data for days
         const historyMap = {};
 
         // Initialize map with empty days to ensure continuous chart
@@ -133,9 +165,8 @@ router.get('/history', async (req, res) => {
         }
 
         entries.forEach(e => {
-            // Assume e.date is ISO string "2024-01-01T12:00:00.000Z"
             const dateStr = e.date.split('T')[0];
-            if (historyMap[dateStr]) { // Only count if within range (query should filter mostly but good to be safe)
+            if (historyMap[dateStr]) {
                 if (e.type === 'food') {
                     historyMap[dateStr].calories_in += e.calories;
                 } else if (e.type === 'sport') {
@@ -144,9 +175,7 @@ router.get('/history', async (req, res) => {
             }
         });
 
-        // Convert to array and sort by date ascending
         const result = Object.values(historyMap).sort((a, b) => a.date.localeCompare(b.date));
-
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: error.message });

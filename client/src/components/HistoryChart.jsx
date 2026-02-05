@@ -9,11 +9,20 @@ export function HistoryChart() {
     useEffect(() => {
         const fetchData = async () => {
             const history = await getHistory(range);
-            // Format dates for display (e.g., '01.01')
-            const formatted = history.map(h => ({
-                ...h,
-                displayDate: new Date(h.date).toLocaleDateString([], { day: '2-digit', month: '2-digit' })
-            }));
+            // Format dates for display
+            const formatted = history.map(h => {
+                let displayDate;
+                if (range === 'year') {
+                    // h.date is YYYY-MM
+                    const [y, m] = h.date.split('-');
+                    const dateObj = new Date(parseInt(y), parseInt(m) - 1);
+                    displayDate = dateObj.toLocaleDateString([], { month: 'short' }); // "Jan", "Feb"
+                } else {
+                    // h.date is YYYY-MM-DD
+                    displayDate = new Date(h.date).toLocaleDateString([], { day: '2-digit', month: '2-digit' });
+                }
+                return { ...h, displayDate };
+            });
             setData(formatted);
         };
         fetchData();
@@ -35,6 +44,12 @@ export function HistoryChart() {
                         className={`px-3 py-1 text-xs rounded-md transition-colors ${range === 'month' ? 'bg-slate-500 text-white' : 'text-gray-400 hover:text-white'}`}
                     >
                         Month
+                    </button>
+                    <button
+                        onClick={() => setRange('year')}
+                        className={`px-3 py-1 text-xs rounded-md transition-colors ${range === 'year' ? 'bg-slate-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                    >
+                        Year
                     </button>
                 </div>
             </div>
