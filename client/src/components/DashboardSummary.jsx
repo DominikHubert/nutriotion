@@ -58,23 +58,30 @@ export function DashboardSummary({ stats, profile, onAddClick }) {
     // defaults or calc
     const bmr = profile?.bmr || 2000;
     const activityLevel = profile?.activity_level || 1.2;
-    const targetCalories = Math.round(bmr * activityLevel);
 
-    // Macro split (approximate standard: 50% carbs, 30% prot, 20% fat)
-    const targetCarbs = Math.round((targetCalories * 0.5) / 4);
-    const targetProtein = Math.round((targetCalories * 0.3) / 4);
-    const targetFat = Math.round((targetCalories * 0.2) / 9);
-
-    const netCalories = stats.calories_in - stats.calories_out;
-    const remaining = Math.max(0, targetCalories - netCalories);
-    const eaten = Math.round(stats.calories_in);
+    // Base target from BMR * Activity
+    const baseTarget = Math.round(bmr * activityLevel);
     const burned = Math.round(stats.calories_out);
+
+    // User Request: Burned calories increase the diagram size (Total Target)
+    const totalTarget = baseTarget + burned;
+
+    const eaten = Math.round(stats.calories_in);
+
+    // Remaining = Total Limit - Eaten
+    const remaining = totalTarget - eaten;
+
+    // Macro split based on Total Target (Base + Burned)
+    const targetCarbs = Math.round((totalTarget * 0.5) / 4);
+    const targetProtein = Math.round((totalTarget * 0.3) / 4);
+    const targetFat = Math.round((totalTarget * 0.2) / 9);
 
     return (
         <div className="bg-slate-800 rounded-3xl p-6 shadow-xl border border-slate-700/50 mb-8">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-gray-200">Daily Summary</h2>
+                <button className="text-sm text-blue-400 hover:text-blue-300 font-medium">Details</button>
             </div>
 
             {/* Main Gauge Area */}
@@ -89,13 +96,15 @@ export function DashboardSummary({ stats, profile, onAddClick }) {
                 {/* Center Gauge */}
                 <div className="relative">
                     <CircularProgress
-                        value={netCalories}
-                        max={targetCalories}
+                        value={eaten}
+                        max={totalTarget}
                         size={160}
                         color={remaining < 0 ? "text-red-500" : "text-emerald-400"}
                     />
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-4xl font-bold text-white">{remaining}</span>
+                        <span className={`text-4xl font-bold ${remaining < 0 ? 'text-red-500' : 'text-white'}`}>
+                            {remaining}
+                        </span>
                         <span className="text-sm text-gray-400">Remaining</span>
                     </div>
                 </div>
