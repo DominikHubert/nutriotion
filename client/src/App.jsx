@@ -147,7 +147,8 @@ function App() {
             }
             await refreshStats();
             setAnalysisResult(null);
-            setCurrentDate(manualDate);
+            setCurrentDate(manualDate); // Show the date of the entry
+            setManualDate(new Date().toISOString().split('T')[0]); // Reset form to today
             setActiveTab('dashboard');
         } catch (e) {
             alert('Failed to save meal');
@@ -165,6 +166,7 @@ function App() {
             await refreshStats();
             setAnalysisResult(null);
             setCurrentDate(manualDate);
+            setManualDate(new Date().toISOString().split('T')[0]);
             setActiveTab('dashboard');
         } catch (e) {
             alert('Failed to save activity');
@@ -198,6 +200,7 @@ function App() {
             await refreshStats();
             setSelectedFavorite(null);
             setCurrentDate(manualDate);
+            setManualDate(new Date().toISOString().split('T')[0]);
             setActiveTab('dashboard');
             alert(`Added ${entryData.name}`);
         } catch (e) {
@@ -240,6 +243,7 @@ function App() {
                 await refreshStats();
                 setAnalysisResult(null);
                 setCurrentDate(manualDate);
+                setManualDate(new Date().toISOString().split('T')[0]);
                 setActiveTab('dashboard');
             } else {
                 // AI Analysis
@@ -271,6 +275,7 @@ function App() {
             setManualSportCalories('');
             await refreshStats();
             setCurrentDate(manualDate);
+            setManualDate(new Date().toISOString().split('T')[0]);
             setActiveTab('dashboard');
         } catch (e) {
             alert("Failed to save activity");
