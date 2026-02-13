@@ -149,6 +149,9 @@ function App() {
             setAnalysisResult(null);
             setCurrentDate(manualDate); // Show the date of the entry
             setManualDate(new Date().toISOString().split('T')[0]); // Reset form to today
+            setManualFoodName('');
+            setManualCalories('');
+            setManualWeight('');
             setActiveTab('dashboard');
         } catch (e) {
             alert('Failed to save meal');
@@ -504,6 +507,20 @@ function App() {
                                 onClick={() => setAddMode('sport')}
                                 className={`flex-1 py-2 rounded-lg ${addMode === 'sport' ? 'bg-orange-600 text-white' : 'bg-slate-700 text-gray-400'}`}
                             >Activity</button>
+                            <button
+                                onClick={() => {
+                                    setManualDate(new Date().toISOString().split('T')[0]);
+                                    setManualFoodName('');
+                                    setManualCalories('');
+                                    setManualWeight('');
+                                    setManualSportName('');
+                                    setManualSportCalories('');
+                                }}
+                                className="px-4 py-2 rounded-lg bg-slate-700 text-gray-400 hover:text-white"
+                                title="Reset Form"
+                            >
+                                Clear
+                            </button>
                         </div>
 
                         {analyzing ? (
